@@ -5,7 +5,8 @@ A small tool for creating images with custom alpha channels.
 
 
 Drag and drop an image onto the top-left slot for the **base image**.  
-Drag and drop an image onto the bottom-left slot for the **alpha image** (ideally a black-and-white image).
+Drag and drop an image onto the bottom-left slot for the **alpha image** (ideally a black-and-white image).  
+Supported image formats: JPEG, PNG, Bitmap (BMP), Targa (TGA), HDR, PIC, and EXR.
 
 Doing so will produce an image on the right slot with the base image and the alpha image combined.  
 Press "S" to save the image (will be exported as a TGA).
