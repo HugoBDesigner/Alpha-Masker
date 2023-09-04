@@ -9,4 +9,6 @@ Drag and drop an image onto the bottom-left slot for the **alpha image** (prefer
 Supported image formats: JPEG, PNG, Bitmap (BMP), Targa (TGA), HDR, PIC, and EXR.
 
 Doing so will produce an image on the right slot with the base image and the alpha image combined. Press the green "download" button to save the result.  
-Press `F1` to access the settings menu, where you can adjust settings such as export format (TGA or PNG), alpha mask fill mode, and more.
+Press `F1` to access the settings menu, where you can adjust settings such as export format (TGA or PNG), alpha mask fill mode, and more.  
+
+Download the latest version on the [Releases Tab](https://github.com/HugoBDesigner/Alpha-Masker/releases).
