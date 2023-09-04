@@ -4,7 +4,7 @@ function love.conf(t)
 	t.version = "11.4"
 	t.console = false
 	
-	t.window.title = "Alpha Masker v0.1"
+	t.window.title = "Alpha Masker"
 	
 	t.window.width = 808
 	t.window.height = 544
