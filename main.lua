@@ -1,7 +1,7 @@
 json = require("json");
 require("util");
 
-version = "0.2";
+version = "0.3";
 love.window.setTitle(love.window.getTitle() .. " v" .. version);
 
 function love.load()
@@ -20,7 +20,12 @@ function love.load()
 		{text = "Alternate Mode", 			type = "boolean", 	var = "alternateMode"},
 		{text = "Export Format", 			type = "list", 		var = "exportFormat"},
 		{text = "Alpha Mask Fill Mode", 	type = "list", 		var = "alphaFillMode"},
+		
+		{text = "", type = "label"},
+		
 		{text = "Render Mode", 				type = "list", 		var = "combinedRenderMode"},
+		{text = "Render Aspect Ratio", 		type = "list", 		var = "aspectRatio"},
+		{text = "Display Image Dimensions", type = "boolean", 	var = "showDimensions"},
 		
 		{text = "", type = "label"},
 		
@@ -49,6 +54,12 @@ function love.load()
 	combinedRenderMode = util
 		.makeList		("transparent_light",   "transparent_dark",   "alpha_mask",           "premultiplied", "selfillum")
 		:appendReference("Transparent (Light)", "Transparent (Dark)", "Highlight Alpha Mask", "Premultiplied", "Emissive ($selfillum)");
+	
+	aspectRatio = util
+		.makeList		("square",       "4_3",                  "source")
+		:appendReference("Square (1:1)", "4:3 (Label-friendly)", "Source");
+		
+	showDimensions = true;
 	
 	readSettings();
 	
@@ -122,6 +133,15 @@ function love.draw()
 	local imgs = {baseImagePreview, alphaImagePreview, combinedImagePreview};
 	
 	local texts = {"Base Image", "Alpha Image", "Combined Image"};
+	if (baseImageData and showDimensions) then
+		texts[1] = texts[1] .. " - " .. baseImageData:getWidth() .. "x" .. baseImageData:getHeight();
+	end
+	if (alphaImageData and showDimensions) then
+		texts[2] = texts[2] .. " - " .. alphaImageData:getWidth() .. "x" .. alphaImageData:getHeight();
+	end
+	if (combinedImageData and showDimensions) then
+		texts[3] = texts[3] .. " - " .. combinedImageData:getWidth() .. "x" .. combinedImageData:getHeight();
+	end
 	for i, v in ipairs(imgSlots) do
 		if (imgs[i]) then
 			if (i == 3) then -- Only the combined view uses all this fancy tech
@@ -161,9 +181,23 @@ function love.draw()
 				end
 			end
 			
+			--aspectRatio = {"square", "4_3", "source"}
+			local scalex = v.width/imgs[i]:getWidth();
+			local scaley = v.height/imgs[i]:getHeight();
+			
+			if (aspectRatio.current == "4_3") then
+				scaley = (v.height*3/4)/imgs[i]:getHeight();
+			elseif (aspectRatio.current == "source") then
+				scalex = math.min(scalex, scaley);
+				scaley = math.min(scalex, scaley);
+			end
+			
+			local px = v.x + v.width/2 - imgs[i]:getWidth()*scalex/2;
+			local py = v.y + v.height/2 - imgs[i]:getHeight()*scaley/2;
+			
 			love.graphics.setColor(1, 1, 1, 1);
 			love.graphics.draw(imgs[i],
-				v.x, v.y, 0, v.width/imgs[i]:getWidth(), v.height/imgs[i]:getHeight());
+				px, py, 0, scalex, scaley);
 		end
 		
 		local dropSpot;
@@ -608,7 +642,13 @@ function renderCombinedImage()
 				-- We ignore alpha here because it is premultiplied in the receiveAlpha step
 				local r2, g2, b2 = 0, 0, 0;
 				if (alphaFillMode.current == "stretch") then
-					local px, py = x / (combinedWidth-1), y / (combinedHeight-1);
+					local px, py = 0, 0;
+					if (combinedWidth > 1) then
+						px = x / (combinedWidth-1);
+					end
+					if (combinedHeight > 1) then
+						py = y / (combinedHeight-1);
+					end
 					px = px * (alphaWidth - 1);
 					py = py * (alphaHeight - 1);
 					
@@ -759,9 +799,11 @@ end
 function getCurrentSettings()
 	local _settings = {
 		["alternateMode"] = alternateMode,
+		["showDimensions"] = showDimensions,
 		["exportFormat"] = exportFormat.idx,
 		["alphaFillMode"] = alphaFillMode.idx,
 		["combinedRenderMode"] = combinedRenderMode.idx,
+		["aspectRatio"] = aspectRatio.idx,
 		["windowWidth"] = windowWidth,
 		["windowHeight"] = windowHeight,
 		["windowMaximized"] = love.window.isMaximized(),
@@ -777,9 +819,11 @@ function applyCurrentSettings(_settings)
 	end
 	
 	alternateMode = settings["alternateMode"];
+	showDimensions = settings["showDimensions"];
 	exportFormat:setIdx(settings["exportFormat"]);
 	alphaFillMode:setIdx(settings["alphaFillMode"]);
 	combinedRenderMode:setIdx(settings["combinedRenderMode"]);
+	aspectRatio:setIdx(settings["aspectRatio"]);
 	local _oldWidth, _oldHeight = windowWidth, windowHeight;
 	windowWidth = settings["windowWidth"];
 	windowHeight = settings["windowHeight"];
